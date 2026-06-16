@@ -580,7 +580,6 @@ main() {
     echo ""
 
     setup_dirs
-    download_apk
     build_rootfs
 
     if [ "${BUILD_QEMU_IOS}" = "true" ]; then

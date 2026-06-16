@@ -144,21 +144,32 @@ setup_dirs() {
 download_apk() {
     log "[2/9] Downloading apk-tools-static (${BUILD_ARCH})..."
 
-    # Fetch latest apk-tools version tag
-    APK_GITLAB="https://gitlab.alpinelinux.org/api/v4/projects/5"
-    APK_TAG=$(curl -sL "${APK_GITLAB}/repository/tags?per_page=1" \
-        | grep -oP '"name":"\K[^"]+' | head -1)
+    # Resolve the latest apk-tools-static version from Alpine APKINDEX
+    ALPINE_MAIN_URL="https://dl-cdn.alpinelinux.org/alpine/latest-stable/main/${BUILD_ARCH}"
+    APKINDEX_URL="${ALPINE_MAIN_URL}/APKINDEX.tar.gz"
 
-    if [ -z "${APK_TAG}" ]; then
-        APK_TAG="v2.14.6" # fallback
+    APK_TOOLS_VER=$(curl -fsSL "${APKINDEX_URL}" \
+        | tar -xz -O APKINDEX 2>/dev/null \
+        | grep -A10 'P:apk-tools-static' \
+        | grep '^V:' | cut -d: -f2 | head -1)
+
+    if [ -z "${APK_TOOLS_VER}" ]; then
+        APK_TOOLS_VER="2.14.6-r0"
     fi
 
-    APK_VERSION="${APK_TAG#v}"
-    APK_URL="${APK_GITLAB}/packages/generic/apk-tools-static/${APK_TAG}/${BUILD_ARCH}/apk.static"
+    APK_URL="${ALPINE_MAIN_URL}/apk-tools-static-${APK_TOOLS_VER}.apk"
 
-    log "    apk-tools: ${APK_TAG}, arch: ${BUILD_ARCH}"
-    curl -fsSL -o /tmp/apk.static "${APK_URL}"
+    log "    apk-tools: ${APK_TOOLS_VER}, arch: ${BUILD_ARCH}"
+    curl -fsSL -o /tmp/apk-tools.apk "${APK_URL}"
+
+    # apk is a tar.gz; extract apk.static from it
+    mkdir -p /tmp/apk-extract
+    tar -xzf /tmp/apk-tools.apk -C /tmp/apk-extract
+    cp /tmp/apk-extract/sbin/apk.static /tmp/apk.static
     chmod +x /tmp/apk.static
+    rm -rf /tmp/apk-extract /tmp/apk-tools.apk
+
+    log "    ✓ apk.static ready ($(/tmp/apk.static --version 2>&1 | head -1))"
 }
 
 # ---- STEP 3: Build Alpine rootfs ----------------------------

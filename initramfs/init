@@ -1,0 +1,35 @@
+#!/bin/busybox sh
+
+set -e
+
+BUSYBOX=/bin/busybox
+
+$BUSYBOX mount -t proc none /proc
+$BUSYBOX mount -t sysfs none /sys
+$BUSYBOX mount -t devtmpfs devtmpfs /dev
+
+$BUSYBOX echo "[initramfs] Mounting Alpine rootfs from squashfs..."
+
+$BUSYBOX mkdir -p /mnt/squashfs
+$BUSYBOX mount -t squashfs -o loop,ro /rootfs.squashfs /mnt/squashfs
+
+$BUSYBOX mkdir -p /mnt/tmpfs
+$BUSYBOX mount -t tmpfs tmpfs /mnt/tmpfs
+$BUSYBOX mkdir -p /mnt/tmpfs/upper /mnt/tmpfs/work /mnt/tmpfs/merged
+
+$BUSYBOX mount -t overlay overlay \
+  -o lowerdir=/mnt/squashfs,upperdir=/mnt/tmpfs/upper,workdir=/mnt/tmpfs/work \
+  /mnt/tmpfs/merged
+
+$BUSYBOX mkdir -p /mnt/tmpfs/merged/boot
+
+if [ -b "/dev/disk/by-partlabel/cache" ]; then
+  $BUSYBOX mount -t vfat /dev/disk/by-partlabel/cache /mnt/tmpfs/merged/boot 2>/dev/null || true
+fi
+
+$BUSYBOX mount --move /proc /mnt/tmpfs/merged/proc
+$BUSYBOX mount --move /sys /mnt/tmpfs/merged/sys
+$BUSYBOX mount --move /dev /mnt/tmpfs/merged/dev
+
+$BUSYBOX echo "[initramfs] Switching root to Alpine (RAM)..."
+exec $BUSYBOX switch_root /mnt/tmpfs/merged /sbin/init

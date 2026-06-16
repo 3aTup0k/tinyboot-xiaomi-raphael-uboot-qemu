@@ -1,0 +1,8 @@
+================================================
+  Alpine Linux RAM Rootfs - Xiaomi Raphael
+  OpenRC | Console-only | QEMU-ready
+================================================
+  This system runs entirely in RAM.
+  Use this as a minimal layer to launch
+  QEMU guest VMs (e.g. qemu-ios).
+================================================

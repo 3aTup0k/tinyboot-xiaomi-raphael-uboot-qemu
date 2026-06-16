@@ -1,0 +1,48 @@
+#!/sbin/openrc-run
+
+description="QEMU-iOS - iPod Touch 2G Emulator"
+
+command="/usr/bin/qemu-system-arm"
+command_background=true
+pidfile="/run/qemu-ios.pid"
+
+# Load config
+: "${QEMU_IOS_BOOTROM:=}"
+: "${QEMU_IOS_NAND:=}"
+: "${QEMU_IOS_NOR:=}"
+: "${QEMU_IOS_EXTRAS:=-serial mon:stdio -cpu max -m 2G -d unimp}"
+
+depend() {
+    need localmount
+    after bootmisc
+}
+
+start() {
+    if [ -f /etc/qemu-ios/env ]; then
+        . /etc/qemu-ios/env
+    fi
+
+    if [ -z "${QEMU_IOS_BOOTROM}" ] || [ -z "${QEMU_IOS_NAND}" ] || [ -z "${QEMU_IOS_NOR}" ]; then
+        eerror "qemu-ios: BOOTROM, NAND, or NOR path not configured!"
+        eerror "Edit /etc/qemu-ios/env or set env vars before starting."
+        return 1
+    fi
+
+    if [ ! -f "${QEMU_IOS_BOOTROM}" ]; then
+        eerror "qemu-ios: Bootrom not found: ${QEMU_IOS_BOOTROM}"
+        return 1
+    fi
+
+    ebegin "Starting qemu-ios (iPod Touch 2G)"
+    start-stop-daemon --start --make-pidfile --pidfile "${pidfile}" \
+        --background --exec "${command}" -- \
+        -M "iPod-Touch,bootrom=${QEMU_IOS_BOOTROM},nand=${QEMU_IOS_NAND},nor=${QEMU_IOS_NOR}" \
+        ${QEMU_IOS_EXTRAS}
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping qemu-ios"
+    start-stop-daemon --stop --pidfile "${pidfile}"
+    eend $?
+}

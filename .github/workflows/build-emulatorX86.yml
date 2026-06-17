@@ -1,4 +1,4 @@
-name: Build QEMU Emulator
+name: Build QEMU Emulator (x86 arch)
 
 on:
   workflow_dispatch:
@@ -51,8 +51,8 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.1
-          name: QEMU ARM Binary v1.1
+          tag_name: build-qemu-X86
+          name: QEMU X86 Binary
           files: build_artifacts/qemu-system-arm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

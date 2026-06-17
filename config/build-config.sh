@@ -29,8 +29,11 @@ get_packages() {
   local system_type="$1"
   local desktop_env="$2"
 
+  # Using base_packages from original debian-server
+  base_packages="bash-completion sudo apt-utils ssh openssh-server nano network-manager systemd-boot initramfs-tools chrony curl wget locales tzdata dnsmasq iptables iproute2 zram-tools openrc"
+
   if [[ "$system_type" == "tinyfs-iphoneos" ]]; then
-    echo "bash coreutils iproute2 netbase net-tools wget nano apt kmod sysvinit-utils openrc"
+    echo "$base_packages"
   else
     echo "bash coreutils"
   fi

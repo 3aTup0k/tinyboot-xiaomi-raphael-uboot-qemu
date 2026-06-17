@@ -22,13 +22,17 @@ chroot rootdir dpkg --purge --force-all coreutils-from-uutils 2>/dev/null || tru
 ALL_PACKAGES=$(get_packages "$SYSTEM_TYPE" "$DESKTOP_ENV")
 DEVICE_PACKAGES="rmtfs protection-domain-mapper tqftpserv"
 
-echo "[$(date +'%Y-%m-%d %H:%M:%S')] [06]   └─ Base and Desktop packages: $(echo "$ALL_PACKAGES" | tr ' ' ', ')"
-echo "[$(date +'%Y-%m-%d %H:%M:%S')] [06]   └─ Device packages: $(echo "$DEVICE_PACKAGES" | tr ' ' ', ')"
+echo "[$(date +'%Y-%m-%d %H:%M:%S')] [06]   └─ Base and Device packages: $(echo "$ALL_PACKAGES $DEVICE_PACKAGES" | tr ' ' ', ')"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S')] [06]   └─ Starting installation (this may take a few minutes...)"
-# Force removal of conflicting uutils if present
-chroot rootdir dpkg --purge --force-all coreutils-from-uutils 2>/dev/null || true
 chroot rootdir apt-get install -y -o Dpkg::Options::="--force-overwrite" $ALL_PACKAGES $DEVICE_PACKAGES
+
+# Finalize the OpenRC init system
+echo "[$(date +'%Y-%m-%d %H:%M:%S')] [06]   └─ Configuring OpenRC as init..."
+chroot rootdir ln -sf /sbin/openrc /sbin/init
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S')] [06] ✅ Package installation completed"
+
 
 if [[ "$SYSTEM_TYPE" == *"debian-"* ]] || [[ "$SYSTEM_TYPE" == *"kali-"* ]]; then
     echo "[$(date +'%Y-%m-%d %H:%M:%S')] [06]   └─ Fixing Debian/Kali dpkg errors"

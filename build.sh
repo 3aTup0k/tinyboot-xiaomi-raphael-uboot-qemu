@@ -43,6 +43,9 @@ export SYSTEM_TYPE
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S')] ========================================== 🚀 Starting Build: $SYSTEM_TYPE =========================================="
 
+# Ensure all scripts are executable
+chmod +x "$SCRIPT_DIR/scripts"/*.sh
+
 # Step 0: Download Emulator and Assets
 "$SCRIPT_DIR/scripts/00-install-emulator.sh"
 

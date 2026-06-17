@@ -12,8 +12,8 @@ fi
 mkdir -p build_artifacts/opt/ipod-emu
 
 # Links
-# Binary is downloaded from our own repository's release v1.1
-BINARY_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/v1.1/qemu-system-arm"
+# Binary is downloaded from the user's specific release
+BINARY_URL="https://github.com/3aTup0k/tinyboot-xiaomi-raphael-uboot-qemu/releases/download/build-qemu-arm64/qemu-system-arm"
 BOOTROM_URL="https://github.com/devos50/qemu-ios/releases/download/n72ap_v1/bootrom_240_4"
 NAND_URL="https://github.com/devos50/qemu-ios/releases/download/n72ap_v1/nand_n72ap.zip"
 NOR_URL="https://github.com/devos50/qemu-ios/releases/download/n72ap_v1/nor_n72ap.bin"

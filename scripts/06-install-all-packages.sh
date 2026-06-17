@@ -15,9 +15,9 @@ echo "[$(date +'%Y-%m-%d %H:%M:%S')] [06] 📦 Installing packages"
 
 export DEBIAN_FRONTEND=noninteractive
 
-echo "[$(date +'%Y-%m-%d %H:%M:%S')] [06]   └─ Updating system packages..."
-chroot rootdir apt-get update
-chroot rootdir apt-get upgrade -y
+# CRITICAL: Remove conflicting uutils package BEFORE any apt operations
+echo "[$(date +'%Y-%m-%d %H:%M:%S')] [06]   └─ Removing conflicting coreutils-from-uutils..."
+chroot rootdir dpkg --purge --force-all coreutils-from-uutils 2>/dev/null || true
 
 ALL_PACKAGES=$(get_packages "$SYSTEM_TYPE" "$DESKTOP_ENV")
 DEVICE_PACKAGES="rmtfs protection-domain-mapper tqftpserv"

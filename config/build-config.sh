@@ -8,7 +8,7 @@ system_config() {
   case "$1" in
     "tinyboot-iphoneos")
       echo "DEBIAN_VERSION=${DEBIAN_VERSION:-trixie}"
-      echo "IMAGE_SIZE=1G"
+      echo "IMAGE_SIZE=4G"
       echo "IS_DESKTOP=false"
       echo "DESKTOP_ENV="
       ;;

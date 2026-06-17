@@ -29,8 +29,8 @@ get_packages() {
   local system_type="$1"
   local desktop_env="$2"
 
-  # Using base_packages from original debian-server
-  base_packages="bash-completion sudo apt-utils ssh openssh-server nano network-manager systemd-boot initramfs-tools chrony curl wget locales tzdata dnsmasq iptables iproute2 zram-tools openrc"
+  # Removed systemd-boot and initramfs-tools to avoid conflicts with OpenRC
+  base_packages="bash-completion sudo apt-utils ssh openssh-server nano network-manager chrony curl wget locales tzdata dnsmasq iptables iproute2 zram-tools openrc"
 
   if [[ "$system_type" == "tinyfs-iphoneos" ]]; then
     echo "$base_packages"

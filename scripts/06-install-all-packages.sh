@@ -25,7 +25,13 @@ DEVICE_PACKAGES="rmtfs protection-domain-mapper tqftpserv"
 echo "[$(date +'%Y-%m-%d %H:%M:%S')] [06]   └─ Base and Device packages: $(echo "$ALL_PACKAGES $DEVICE_PACKAGES" | tr ' ' ', ')"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S')] [06]   └─ Starting installation (this may take a few minutes...)"
+# Fix broken dependencies first
+chroot rootdir apt-get install -f -y
+# Install main packages with force overwrite
 chroot rootdir apt-get install -y -o Dpkg::Options::="--force-overwrite" $ALL_PACKAGES $DEVICE_PACKAGES
+# Fix broken dependencies again after installation
+chroot rootdir apt-get install -f -y
+
 
 # Finalize the OpenRC init system
 echo "[$(date +'%Y-%m-%d %H:%M:%S')] [06]   └─ Configuring OpenRC as init..."

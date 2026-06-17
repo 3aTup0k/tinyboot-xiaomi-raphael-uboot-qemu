@@ -23,10 +23,10 @@ EOF
 else
     echo "[$(date +'%Y-%m-%d %H:%M:%S')] [05]   └─ Configuring Debian $DEBIAN_VERSION sources"
     cat > rootdir/etc/apt/sources.list << EOF
-deb http://deb.debian.org/debian/ $DEBIAN_VERSION main contrib non-free non-free-firmware
-deb http://deb.debian.org/debian/ $DEBIAN_VERSION-updates main contrib non-free non-free-firmware
-deb http://deb.debian.org/debian/ $DEBIAN_VERSION-backports main contrib non-free non-free-firmware
-deb http://security.debian.org/debian-security $DEBIAN_VERSION-security main contrib non-free non-free-firmware
+deb [trusted=yes] http://deb.debian.org/debian/ $DEBIAN_VERSION main contrib non-free non-free-firmware
+deb [trusted=yes] http://deb.debian.org/debian/ $DEBIAN_VERSION-updates main contrib non-free non-free-firmware
+deb [trusted=yes] http://deb.debian.org/debian/ $DEBIAN_VERSION-backports main contrib non-free non-free-firmware
+deb [trusted=yes] http://security.debian.org/debian-security $DEBIAN_VERSION-security main contrib non-free non-free-firmware
 EOF
 fi
 

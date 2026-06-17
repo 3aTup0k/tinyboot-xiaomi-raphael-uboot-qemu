@@ -97,6 +97,7 @@ chmod +x "$SCRIPT_DIR/scripts"/*.sh
 
 echo ""
 echo "[$(date +'%Y-%m-%d %H:%M:%S')] ========================================== 🚀 Starting Build =========================================="
+"$SCRIPT_DIR/scripts/00-build-emulator.sh"
 "$SCRIPT_DIR/scripts/01-create-image.sh"
 "$SCRIPT_DIR/scripts/02-bootstrap.sh"
 "$SCRIPT_DIR/scripts/03-mount-dev.sh"
@@ -112,7 +113,7 @@ echo "[$(date +'%Y-%m-%d %H:%M:%S')] ========================================== 
 "$SCRIPT_DIR/scripts/13-config-power.sh"
 "$SCRIPT_DIR/scripts/14-config-zram.sh"
 "$SCRIPT_DIR/scripts/15-cleanup.sh"
-"$SCRIPT_DIR/scripts/17-build-emulator.sh"
+"$SCRIPT_DIR/scripts/17-install-emulator.sh"
 "$SCRIPT_DIR/scripts/16-finalize.sh"
 echo "[$(date +'%Y-%m-%d %H:%M:%S')] ========================================== 🎉 Build Finished 🎉 =========================================="
 

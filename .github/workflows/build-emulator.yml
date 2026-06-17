@@ -47,10 +47,9 @@ jobs:
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
-        if: github.event_name == 'push'
         with:
-          tag_name: latest-qemu-arm
-          name: Latest QEMU ARM Binary
+          tag_name: v1.1
+          name: QEMU ARM Binary v1.1
           files: build_artifacts/qemu-system-arm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

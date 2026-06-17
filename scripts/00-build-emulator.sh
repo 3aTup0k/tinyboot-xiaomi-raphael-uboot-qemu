@@ -29,6 +29,8 @@ mkdir build && cd build
     --disable-werror \
     --extra-cflags="-fPIC" \
     --extra-ldflags="-lcrypto"
+ \
+    --extra-ldflags="-lcrypto"
 
 make -j$(nproc)
 

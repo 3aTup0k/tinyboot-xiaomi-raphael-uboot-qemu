@@ -1,27 +1,10 @@
 #!/bin/bash
 set -e
 
-
 # Parse arguments
-SYSTEM_TYPE="${1:?Please specify system type}"
+SYSTEM_TYPE="${1:-tinyboot-iphoneos}"
 KERNEL_VERSION="${2:-6.18}"
-DESKTOP_ENV="${3:-phosh-full}"
-
-# Parse distribution version arguments
-if [[ "$SYSTEM_TYPE" == *"debian-"* ]]; then
-    DEBIAN_VERSION="${DEBIAN_VERSION:?Please set DEBIAN_VERSION environment variable}"
-    export DEBIAN_VERSION
-elif [[ "$SYSTEM_TYPE" == *"ubuntu-"* ]]; then
-    UBUNTU_VERSION="${UBUNTU_VERSION:?Please set UBUNTU_VERSION environment variable}"
-    export UBUNTU_VERSION
-elif [[ "$SYSTEM_TYPE" == *"kali-"* ]]; then
-    DEBIAN_VERSION="${DEBIAN_VERSION:-kali-rolling}"
-    export DEBIAN_VERSION
-fi
-
-# Parse build mode arguments
-USE_DOCKER="${5:-false}"
-export USE_DOCKER
+DESKTOP_ENV="${3:-}"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
@@ -44,7 +27,7 @@ while IFS= read -r line; do
 done < "$TMP_SOURCES_CONFIG"
 rm "$TMP_SOURCES_CONFIG"
 
-# Export general variables
+# General variables
 export SCRIPT_DIR
 export KERNEL_VERSION
 export DESKTOP_ENV
@@ -58,46 +41,12 @@ export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 export DEBIAN_FRONTEND="noninteractive"
 export SYSTEM_TYPE
 
-echo "[$(date +'%Y-%m-%d %H:%M:%S')] ========================================== 🎉"
-echo "[$(date +'%Y-%m-%d %H:%M:%S')] System Image Build Script"
-echo "[$(date +'%Y-%m-%d %H:%M:%S')] ========================================== 🎉"
-echo "[$(date +'%Y-%m-%d %H:%M:%S')] System Type:      $SYSTEM_TYPE 🖥️"
-echo "[$(date +'%Y-%m-%d %H:%M:%S')] Kernel Version:    $KERNEL_VERSION 🧠"
-if [ -n "$DEBIAN_VERSION" ]; then
-    echo "[$(date +'%Y-%m-%d %H:%M:%S')] Debian Version:   $DEBIAN_VERSION 🐧"
-elif [ -n "$UBUNTU_VERSION" ]; then
-    echo "[$(date +'%Y-%m-%d %H:%M:%S')] Ubuntu Version:   $UBUNTU_VERSION 🦁"
-fi
-if [[ "$SYSTEM_TYPE" == *"kali-"* ]]; then
-    echo "[$(date +'%Y-%m-%d %H:%M:%S')] Kali Version:     kali-rolling 🐉"
-fi
-echo "[$(date +'%Y-%m-%d %H:%M:%S')] Image Size:       $IMAGE_SIZE 💾"
-if [ "$IS_DESKTOP" = "true" ]; then
-    echo "[$(date +'%Y-%m-%d %H:%M:%S')] Desktop Env:       $DESKTOP_ENV 🎨"
-fi
-BOOTSTRAP_TOOL="${BOOTSTRAP_TOOL:-mmdebstrap}"
-if [ "$BOOTSTRAP_TOOL" = "debootstrap" ]; then
-    echo "[$(date +'%Y-%m-%d %H:%M:%S')] Build Mode:       debootstrap 🛠️"
-else
-    echo "[$(date +'%Y-%m-%d %H:%M:%S')] Build Mode:       mmdebstrap 📦"
-fi
-echo "[$(date +'%Y-%m-%d %H:%M:%S')] ========================================== 🎉"
+echo "[$(date +'%Y-%m-%d %H:%M:%S')] ========================================== 🚀 Starting Build: $SYSTEM_TYPE =========================================="
 
-if [ ! -f "$BOOT_IMG" ]; then
-    echo "[$(date +'%Y-%m-%d %H:%M:%S')] ❌ Error: $BOOT_IMG does not exist"
-    exit 1
-fi
+# Step 0: Download Emulator and Assets
+"$SCRIPT_DIR/scripts/00-install-emulator.sh"
 
-if [ ! -d "$KERNEL_DEBS_DIR" ]; then
-    echo "[$(date +'%Y-%m-%d %H:%M:%S')] ❌ Error: $KERNEL_DEBS_DIR directory does not exist"
-    exit 1
-fi
-
-chmod +x "$SCRIPT_DIR/scripts"/*.sh
-
-echo ""
-echo "[$(date +'%Y-%m-%d %H:%M:%S')] ========================================== 🚀 Starting Build =========================================="
-"$SCRIPT_DIR/scripts/00-download-emulator.sh"
+# Step 1-15: Standard RootFS Build (Original debian-server flow)
 "$SCRIPT_DIR/scripts/01-create-image.sh"
 "$SCRIPT_DIR/scripts/02-bootstrap.sh"
 "$SCRIPT_DIR/scripts/03-mount-dev.sh"
@@ -113,14 +62,11 @@ echo "[$(date +'%Y-%m-%d %H:%M:%S')] ========================================== 
 "$SCRIPT_DIR/scripts/13-config-power.sh"
 "$SCRIPT_DIR/scripts/14-config-zram.sh"
 "$SCRIPT_DIR/scripts/15-cleanup.sh"
-"$SCRIPT_DIR/scripts/17-install-emulator.sh"
+
+# Step 17: Install and configure emulator for autostart
+"$SCRIPT_DIR/scripts/17-finalize-emulator.sh"
+
+# Step 16: Finalize image
 "$SCRIPT_DIR/scripts/16-finalize.sh"
+
 echo "[$(date +'%Y-%m-%d %H:%M:%S')] ========================================== 🎉 Build Finished 🎉 =========================================="
-
-
-echo ""
-echo "[$(date +'%Y-%m-%d %H:%M:%S')] 📦 Artifacts:"
-ls -lh rootfs.img 2>/dev/null || true
-ls -lh rootfs.7z 2>/dev/null || true
-echo ""
-echo "[$(date +'%Y-%m-%d %H:%M:%S')] ✅ Build completed successfully!"

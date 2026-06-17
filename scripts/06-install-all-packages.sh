@@ -33,10 +33,6 @@ chroot rootdir apt-get install -y -o Dpkg::Options::="--force-overwrite" $ALL_PA
 chroot rootdir apt-get install -f -y
 
 
-# Finalize the OpenRC init system
-echo "[$(date +'%Y-%m-%d %H:%M:%S')] [06]   └─ Configuring OpenRC as init..."
-chroot rootdir ln -sf /sbin/openrc /sbin/init
-
 echo "[$(date +'%Y-%m-%d %H:%M:%S')] [06] ✅ Package installation completed"
 
 

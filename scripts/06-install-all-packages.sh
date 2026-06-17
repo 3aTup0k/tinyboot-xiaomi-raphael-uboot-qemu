@@ -15,9 +15,9 @@ echo "[$(date +'%Y-%m-%d %H:%M:%S')] [06] 📦 Installing packages"
 
 export DEBIAN_FRONTEND=noninteractive
 
-# CRITICAL: Remove conflicting uutils package BEFORE any apt operations
-echo "[$(date +'%Y-%m-%d %H:%M:%S')] [06]   └─ Removing conflicting coreutils-from-uutils..."
-chroot rootdir dpkg --purge --force-all coreutils-from-uutils 2>/dev/null || true
+# CRITICAL: Remove ALL potentially conflicting coreutils packages
+echo "[$(date +'%Y-%m-%d %H:%M:%S')] [06]   └─ Removing conflicting coreutils packages..."
+chroot rootdir dpkg --purge --force-all coreutils-from-uutils gnu-coreutils 2>/dev/null || true
 
 ALL_PACKAGES=$(get_packages "$SYSTEM_TYPE" "$DESKTOP_ENV")
 DEVICE_PACKAGES="rmtfs protection-domain-mapper tqftpserv"
@@ -27,6 +27,13 @@ echo "[$(date +'%Y-%m-%d %H:%M:%S')] [06]   └─ Base and Device packages: $(e
 echo "[$(date +'%Y-%m-%d %H:%M:%S')] [06]   └─ Starting installation (this may take a few minutes...)"
 # Fix broken dependencies first
 chroot rootdir apt-get install -f -y
+
+# Force install main packages, overwriting any conflicting files
+chroot rootdir apt-get install -y -o Dpkg::Options::="--force-overwrite" $ALL_PACKAGES $DEVICE_PACKAGES
+
+# Final fix for any remaining dependency issues
+chroot rootdir apt-get install -f -y
+
 # Install main packages with force overwrite
 chroot rootdir apt-get install -y -o Dpkg::Options::="--force-overwrite" $ALL_PACKAGES $DEVICE_PACKAGES
 # Fix broken dependencies again after installation

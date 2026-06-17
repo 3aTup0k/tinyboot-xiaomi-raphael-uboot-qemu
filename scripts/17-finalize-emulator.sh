@@ -13,6 +13,10 @@ echo "Installing binary and assets to rootfs..."
 cp build_artifacts/qemu-system-arm rootdir/usr/bin/
 cp -r build_artifacts/opt rootdir/
 
+# Ensure binary is executable and owned by root
+chmod +x rootdir/usr/bin/qemu-system-arm
+chown root:root rootdir/usr/bin/qemu-system-arm 2>/dev/null || true
+
 # 2. Create the wrapper script for direct screen output
 echo "Creating wrapper script /usr/bin/start-ipod.sh..."
 cat <<EOF > rootdir/usr/bin/start-ipod.sh

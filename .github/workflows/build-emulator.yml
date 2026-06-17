@@ -1,0 +1,56 @@
+name: Build QEMU Emulator
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'scripts/00-download-emulator.sh' # Trigger if assets paths change
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git build-essential pkg-config libssl-dev libsdl2-dev libpixman-1-dev libglib2.0-dev ninja-build python3
+
+      - name: Build QEMU
+        run: |
+          git clone https://github.com/devos50/qemu-ios.git qemu-ios-src
+          cd qemu-ios-src
+          mkdir build && cd build
+          ../configure --target-list=arm-softmmu \
+              --enable-sdl \
+              --disable-cocoa \
+              --disable-capstone \
+              --disable-slirp \
+              --disable-guest-agent \
+              --disable-werror \
+              --extra-cflags="-fPIC" \
+              --extra-ldflags="-lcrypto"
+          make -j$(nproc)
+          mkdir -p ../../build_artifacts
+          cp arm-softmmu/qemu-system-arm ../../build_artifacts/
+
+      - name: Upload Binary Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: qemu-system-arm
+          path: build_artifacts/qemu-system-arm
+          retention-days: 7
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        if: github.event_name == 'push'
+        with:
+          tag_name: latest-qemu-arm
+          name: Latest QEMU ARM Binary
+          files: build_artifacts/qemu-system-arm
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
